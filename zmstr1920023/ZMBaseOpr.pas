@@ -133,7 +133,7 @@ uses
   ShellAPI,
 {$ENDIF}
   ZMMsg, ZMDrv, ZMUtils, ZMZipBase, ZMZipDirectory, ZMUTF8, ZMWinFuncs,
-  ZMEngine, ZMStructs, ZMSFXInt, ZMXcpt;
+  ZMEngine, ZMStructs, ZMSFXInt, ZMXcpt, ZMTrace;
 
 const
   __UNIT__ = 3;
@@ -152,6 +152,7 @@ const
 
 function ZM_Error(Line, Error: Integer): Integer;
 begin
+  SendZMError('ZMBaseOpr', Line, Error);
   Result := -((__UNIT__ shl ZERR_UNIT_SHIFTS) + (Line shl ZERR_LINE_SHIFTS) or
     AbsErr(Error));
 end;

@@ -103,8 +103,7 @@ uses
   {$ELSE}
     Forms, ShlObj, ShellAPI,
   {$ENDIF}
-   ZMStructs, TraceTool, StackTrace, ZMTrace,
-   ZMUtils{$IFNDEF UNICODE}, ZMUTF8, ZMHandler{$ENDIF};
+   ZMStructs, ZMUtils{$IFNDEF UNICODE}, ZMUTF8, ZMHandler{$ENDIF};
 
 type
   TZMWString = {$IFDEF UNICODE}String{$ELSE}WideString{$ENDIF};
@@ -288,7 +287,6 @@ const
     FILE_SHARE_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE);
 var
   XPath: TZMWString;
-  Node: ITraceNodeEx;
 begin
   Result := -1;
   if ((Mode and 3) <= fmOpenReadWrite) and
@@ -299,15 +297,6 @@ begin
         ShareMode[(Mode and $F0) shr 4], nil, OPEN_EXISTING,
         FILE_ATTRIBUTE_NORMAL, 0));
     end;
-
-  Node := ZipTrace.Debug.CreateNodeEx;
-  Node.LeftMsg := '_Z_FileOpen Mode: ' + Mode.ToString;
-  Node.RightMsg :=  Result.ToString;
-  Node.AddStackTrace();
-  if (Mode <> 1) and (Result <> -1) then
-    Node.Send.SetColor(LIGHT_YELLOW2)
-  else
-    Node.Send;
 end;
 
 function _FindMatchingFileW(var F: _Z_TSearchRec): Integer;

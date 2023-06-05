@@ -139,7 +139,7 @@ type
 implementation
 
 uses
-  ZMCore, ZMMsg, ZMWinFuncs, ZMUtils;
+  ZMCore, ZMMsg, ZMWinFuncs, ZMUtils, ZMTrace;
 
 const
   __UNIT__ = 18;
@@ -206,6 +206,7 @@ begin
     Th := FHandle;
     FHandle := -1;
     FileClose(Th);
+    ZipTrace.SendStack('TZMSingleFileStream.File_Close').SetColor(LIGHT_YELLOW2);
     Body.TraceFmt('Closed %s', [RealFileName], {_LINE_}223, __UNIT__);
   end;
 end;

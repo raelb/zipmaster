@@ -229,7 +229,6 @@ type
 
 function ZM_Error(Line, Error: Integer): Integer;
 begin
-  SendZMError('ZMOprDLL', Line, Error);
   Result := -((__UNIT__ shl ZERR_UNIT_SHIFTS) + (Line shl ZERR_LINE_SHIFTS) or
     AbsErr(Error));
 end;
@@ -1141,12 +1140,8 @@ begin
     try
       CmdRecP := SetupZipCmd(TmpZipName);
       FEventErr := ''; // added
-      { pass in a ptr to parms }  /////***RB_TRACE main call to _DLL_Exec
-      //ZipTrace.SendValue('Lister ' + FDLLOperKey.ToString, Lister);
-      ZipTrace.SendStrings('Lister.IncludeSpecs', Lister.IncludeSpecs);
+      { pass in a ptr to parms }
       SuccessCnt := _DLL_Exec(Lister, CmdRecP, FDLLOperKey);
-      //ZipTrace.SendValue('Lister (after)', Lister);
-
       FEventErr := ''; // added
       if MultiDisk then
       begin
@@ -1247,14 +1242,6 @@ var
   Sr: _Z_TSearchRec;
   Wd: TZMWorkDrive;
   Xname: string;
-
-  function GetColor(R: Boolean): TColor;
-  begin
-    if R then
-      Result := LIGHT_GREEN
-    else
-      Result := LIGHT_RED;
-  end;
 begin
   Result := False;
   Wd := TZMWorkDrive.Create(Body);
@@ -1265,7 +1252,7 @@ begin
     if not Wd.HasMedia(False) then
     begin
       Result := AllowEmpty and (Wd.DriveType = DRIVE_REMOVABLE);
-      ZipTrace.Send('IsDestWritable: ' + FName, Result).SetColor(GetColor(Result));
+      ZipTrace.Send('IsDestWritable: ' + FName, Result);
       // assume can put in writable disk
       Exit;
     end;
@@ -1284,8 +1271,7 @@ begin
           if Result then
 {$IFDEF VERDXE2up}System.{$ENDIF}SysUtils.FileClose(HFile);
         end;
-        ZipTrace.Send('IsDestWritable (locked/ro): ' + FName,
-          Result).SetColor(GetColor(Result));
+        ZipTrace.Send('IsDestWritable (locked/ro): ' + FName, Result);
         Exit;
       end;
       // file did not exist - try to create it
@@ -1300,8 +1286,7 @@ begin
   finally
     Wd.Free;
   end;
-  ZipTrace.Send('IsDestWritable (end): ' + FName,
-    Result).SetColor(GetColor(Result));
+  ZipTrace.Send('IsDestWritable (end): ' + FName, Result);
 end;
 
 function TZMDLLOpr.JoinMVArchive(var TmpZipName: string): Integer;

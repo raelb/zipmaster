@@ -99,7 +99,7 @@ uses
 {$ENDIF}
   Forms, ZipMstr, ZMDelZip, ZMBody, ZMBaseOpr, ZMXcpt, ZMFileOpr, ZMLister,
   ZMMsg, ZMUtils, ZMDrv, ZMStructs, ZMUTF8, ZMZipReader, ZMDLLLoad, ZMWinFuncs,
-  ZMZipBase, ZMZipWriter, ZMCore, ZMCommand, ZMTrace;
+  ZMZipBase, ZMZipWriter, ZMCore, ZMCommand;
 
 const
   __UNIT__ = 28;
@@ -229,7 +229,6 @@ type
 
 function ZM_Error(Line, Error: Integer): Integer;
 begin
-  SendZMError('ZMOprDLL', Line, Error);
   Result := -((__UNIT__ shl ZERR_UNIT_SHIFTS) + (Line shl ZERR_LINE_SHIFTS) or
     AbsErr(Error));
 end;
@@ -367,25 +366,14 @@ begin
   Fn := Trim(FileName);
   if (Length(Fn) = 0) and (IncludeSpecs.Count > 0) then
     Fn := Trim(IncludeSpecs[0]);
-  // Edwin:
-  // - Fixed: Allow empty stream (Size = 0) to be added to the target .zip archive
-  // if (Fn = '') or (ZipStream.Size = 0) then
-  if Fn = '' then
-  // Edwin end
+  if (Fn = '') or (ZipStream.Size = 0) then
   begin
-    Result := ZM_Error({_LINE_}376, ZE_NothingToZip);
+    Result := ZM_Error({_LINE_}372, ZE_NothingToZip);
     Exit;
   end;
-
-  // Edwin:
-  // - Fixed: AddStreamToFile should not call DriveFolders.ExpandPath, otherwise you won't be able to
-  //   compress a file into the target zip archive into a relative path such as
-  //   `MyFolder1\MyFile1.txt' (relative to the root of the zip file).
-  //  Result := DriveFolders.ExpandPath(Fn, Fn);
-  //  if Result < 0 then
-  //    Exit;
-  Result := 0;
-  // Edwin end
+  Result := DriveFolders.ExpandPath(Fn, Fn);
+  if Result < 0 then
+    Exit;
   // strip drive etc like 1.79
   if ExtractFileDrive(Fn) <> '' then
     Fn := Copy(Fn, 3, Length(Fn) - 2);
@@ -1141,12 +1129,8 @@ begin
     try
       CmdRecP := SetupZipCmd(TmpZipName);
       FEventErr := ''; // added
-      { pass in a ptr to parms }  /////***RB_TRACE main call to _DLL_Exec
-      //ZipTrace.SendValue('Lister ' + FDLLOperKey.ToString, Lister);
-      ZipTrace.SendStrings('Lister.IncludeSpecs', Lister.IncludeSpecs);
+      { pass in a ptr to parms }
       SuccessCnt := _DLL_Exec(Lister, CmdRecP, FDLLOperKey);
-      //ZipTrace.SendValue('Lister (after)', Lister);
-
       FEventErr := ''; // added
       if MultiDisk then
       begin
@@ -1247,15 +1231,9 @@ var
   Sr: _Z_TSearchRec;
   Wd: TZMWorkDrive;
   Xname: string;
-
-  function GetColor(R: Boolean): TColor;
-  begin
-    if R then
-      Result := LIGHT_GREEN
-    else
-      Result := LIGHT_RED;
-  end;
 begin
+  //Result := True; exit;
+
   Result := False;
   Wd := TZMWorkDrive.Create(Body);
   try
@@ -1265,7 +1243,6 @@ begin
     if not Wd.HasMedia(False) then
     begin
       Result := AllowEmpty and (Wd.DriveType = DRIVE_REMOVABLE);
-      ZipTrace.Send('IsDestWritable: ' + FName, Result).SetColor(GetColor(Result));
       // assume can put in writable disk
       Exit;
     end;
@@ -1278,14 +1255,11 @@ begin
         if Result then
         begin
           // exists and is not read-only - test locked
-          ZipTrace.Send('exists.. test if locked...');
           HFile := _Z_FileOpen(Xname, FmOpenWrite);
           Result := HFile > -1;
           if Result then
 {$IFDEF VERDXE2up}System.{$ENDIF}SysUtils.FileClose(HFile);
         end;
-        ZipTrace.Send('IsDestWritable (locked/ro): ' + FName,
-          Result).SetColor(GetColor(Result));
         Exit;
       end;
       // file did not exist - try to create it
@@ -1300,8 +1274,6 @@ begin
   finally
     Wd.Free;
   end;
-  ZipTrace.Send('IsDestWritable (end): ' + FName,
-    Result).SetColor(GetColor(Result));
 end;
 
 function TZMDLLOpr.JoinMVArchive(var TmpZipName: string): Integer;

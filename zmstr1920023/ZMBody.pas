@@ -274,6 +274,7 @@ type
     function _GetExtrPassword(var Response: TMsgDlgBtn): string;
     function _GetPassword(const DialogCaption, MsgTxt: string; Ctx: Integer;
       Pwb: TMsgDlgButtons; var ResultStr: string): TMsgDlgBtn;
+  published
     property AddCompLevel: Integer read FAddCompLevel write FAddCompLevel;
     property AddFrom: TDateTime read FAddFrom write FAddFrom;
     property AddOptions: TZMAddOpts read FAddOptions write FAddOptions;
@@ -385,7 +386,8 @@ type
 implementation
 
 uses
-  ZMUtils, ZMDlg, ZMCtx, ZMXcpt, ZMStructs, ZMMsg;
+  ZMUtils, ZMDlg, ZMCtx, ZMXcpt, ZMStructs, ZMMsg, ZMTrace, TraceTool,
+  StackTrace;
 
 const
   __UNIT__ = 4;
@@ -551,6 +553,7 @@ begin
     FCore.TraceFmt('#Item - "%s" %d', [ItemName, ItemSize], {_LINE_}569,
       __UNIT__);
 {$ENDIF}
+    //ZipTrace.SendStack('NewItem: ' + FName);
     GiveProgress(True);
   end
   else
@@ -1039,7 +1042,14 @@ begin
 end;
 
 procedure TZMBase.ShowExceptionError(const ZMExcept: Exception);
+var
+  Node: ITraceNodeEx;
 begin
+  Node := ZipTrace.Debug.CreateNodeEx;
+  Node.LeftMsg := ZMExcept.ClassName;
+  Node.RightMsg := ZMExcept.Message;
+  Node.AddStackTrace();
+  Node.Send.SetColor(LIGHT_RED);
   Body.ShowExceptionError(ZMExcept);
 end;
 

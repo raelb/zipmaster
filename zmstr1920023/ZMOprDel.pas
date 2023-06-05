@@ -77,7 +77,7 @@ uses
 {$ENDIF}
   ZipMstr, ZMLister, ZMBody, ZMBaseOpr, ZMMisc,
   ZMArgSplit, ZMZipBase, ZMZipReader, ZMZipWriter, ZMZipDirectory, ZMXcpt,
-  ZMStructs, ZMUtils, ZMMsg, ZMCore;
+  ZMStructs, ZMUtils, ZMMsg, ZMCore, ZMTrace;
 
 const
   __UNIT__ = 27;
@@ -89,6 +89,7 @@ const
 
 function ZM_Error(Line, Error: Integer): Integer;
 begin
+  SendZMError('ZMOprDel', Line, Error);
   Result := -((__UNIT__ shl ZERR_UNIT_SHIFTS) + (Line shl ZERR_LINE_SHIFTS) or
     AbsErr(Error));
 end;

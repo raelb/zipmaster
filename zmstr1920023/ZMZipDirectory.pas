@@ -164,6 +164,10 @@ type
     function Select(How: TZMSelects): Boolean;
     function SetStatusBit(const Value: Cardinal): Cardinal;
     function TestStatusBit(const Mask: Cardinal): Boolean;
+  public
+    property Status[Bit: Cardinal]: Boolean read GetStatus write SetStatus;
+    property StatusBit[Mask: Cardinal]: Cardinal read GetStatusBit;
+  published
     property Body: TZMBody read FBody;
     property CompressedSize: Int64 read GetCompressedSize;
     property CompressionMethod: Word read GetCompressionMethod;
@@ -194,8 +198,6 @@ type
     property SelectArgs: TZMSelectArgs read FSelectArgs write FSelectArgs;
     property Selected: Boolean read GetSelected write SetSelected;
     property StartOnDisk: Cardinal read GetStartOnDisk;
-    property Status[Bit: Cardinal]: Boolean read GetStatus write SetStatus;
-    property StatusBit[Mask: Cardinal]: Cardinal read GetStatusBit;
     property StatusBits: Cardinal read FStatusBits write FStatusBits;
     property Title: string read GetTitle;
     property UncompressedSize: Int64 read GetUncompressedSize;
@@ -286,6 +288,7 @@ type
     function SelectFiles(const Want, Reject: TStrings): Integer;
     function SelectRec(const Pattern, Reject: string; How: TZMSelects;
       SelArgs: TZMSelectArgs): Integer;
+  published
     property ArgsList: TZMSelectArgs read FArgsList;
     property Count: Integer read FCount;
     property FirstRec: TZMEntryBase read FFirstRec write FFirstRec;

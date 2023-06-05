@@ -137,10 +137,12 @@ type
     procedure Refresh;
     procedure Set_ExtStream(const Value: TStream);
     procedure Set_ZipFileName(const Zname: string; Load: TZMLoadOpts);
+  public
+    property DirEntry[Idx: Integer]: TZMDirEntry read GetDirEntry; default;
+  published
     property Count: Integer read GetCount;
     property Current: TZMZipReader read GetCurrent write SetCurrent;
     property CurrentIsValid: Boolean read GetCurrentIsValid;
-    property DirEntry[Idx: Integer]: TZMDirEntry read GetDirEntry; default;
     property DirOnlyCnt: Integer read GetDirOnlyCnt;
     property ExtStream: TStream read FExtStream;
     property IsSpanned: Boolean read GetIsSpanned;

@@ -199,7 +199,7 @@ uses
 {$ELSE}
   Dialogs, ShlObj,
 {$ENDIF}
-  ZMLister, ZMBody, ZMUtils, ZMMsg, ZMWinFuncs, ZMCore, ZMMisc, ZMXcpt;
+  ZMLister, ZMBody, ZMUtils, ZMMsg, ZMWinFuncs, ZMCore, ZMMisc, ZMXcpt, ZMTrace;
 
 const
   __UNIT__ = 37;
@@ -223,6 +223,7 @@ const
 
 function ZM_Error(Line, Error: Integer): Integer;
 begin
+  SendZMError('ZMUnzipOpr', Line, Error);
   Result := -((__UNIT__ shl ZERR_UNIT_SHIFTS) + (Line shl ZERR_LINE_SHIFTS) or
     AbsErr(Error));
 end;
@@ -1329,6 +1330,8 @@ begin
         DestStream.Size := 0;
     finally
       ZReader.Guage.EndItem;
+
+      ZReader.File_Close;
     end;
   end;
 end;
